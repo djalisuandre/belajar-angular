@@ -13,6 +13,70 @@
     </div>
   </div>
 
+  <!-- Tombol untuk membuka modal -->
+  <button
+    type="button"
+    class="btn btn-primary mb-3"
+    data-bs-toggle="modal"
+    data-bs-target="#tambahFakultasModal"
+  >
+    Tambah Fakultas
+  </button>
+
+  <!-- Modal Tambah Fakultas -->
+  <div
+    class="modal fade"
+    id="tambahFakultasModal"
+    tabindex="-1"
+    aria-labelledby="tambahFakultasModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="tambahFakultasModalLabel">
+            Tambah Fakultas
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="fakultasForm" (ngSubmit)="addFakultas()">
+            <div class="mb-3">
+              <label for="nama" class="form-label">Nama Fakultas</label>
+              <input
+                id="nama"
+                type="text"
+                class="form-control"
+                formControlName="nama"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="singkatan" class="form-label">Singkatan</label>
+              <input
+                id="singkatan"
+                type="text"
+                class="form-control"
+                formControlName="singkatan"
+              />
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="isSubmitting"
+            >
+              {{ isSubmitting ? "Menyimpan..." : "Tambah Fakultas" }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Data Fakultas -->
   <table class="table table-bordered table-striped" *ngIf="!isLoading">
     <!-- Tabel ditampilkan hanya jika `isLoading` bernilai false -->
