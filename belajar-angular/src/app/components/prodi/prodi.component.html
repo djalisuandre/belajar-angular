@@ -1,20 +1,37 @@
-<div class="container my-5">
-  <h2>Data Fakultas</h2>
-  <table class="table table-bordered table-striped">
+<div class="container mt-4">
+  <!-- Kontainer utama untuk daftar Prodi, memberikan margin atas menggunakan kelas Bootstrap "mt-4". -->
+  <h2>Daftar Prodi</h2>
+  <!-- Judul halaman untuk daftar Prodi -->
+
+  <!-- Loader -->
+  <div class="d-flex justify-content-center mt-4" *ngIf="isLoading">
+    <!-- Loader ditampilkan jika properti `isLoading` bernilai true -->
+    <div class="spinner-border text-primary" role="status">
+      <!-- Komponen spinner Bootstrap untuk menampilkan animasi loading -->
+      <span class="visually-hidden">Loading...</span>
+      <!-- Teks alternatif untuk pembaca layar, membantu aksesibilitas -->
+    </div>
+  </div>
+
+  <!-- Data Prodi -->
+  <table class="table table-bordered table-striped" *ngIf="!isLoading">
+    <!-- Tabel ditampilkan hanya jika `isLoading` bernilai false -->
     <thead>
       <tr>
-        <th>#</th>
-        <th>Nama Prodi</th>
+        <!-- Baris header tabel -->
+        <th>Nama</th>
+        <!-- Kolom untuk menampilkan nama Prodi -->
         <th>Singkatan</th>
-        <th>Aksi</th>
+        <!-- Kolom untuk menampilkan nama dekan -->
       </tr>
     </thead>
     <tbody>
-      <!-- Data Fakultas akan di-loop di sini -->
-      <tr>
-        <td>1</td>
-        <td>Sistem Informasi</td>
-        <td>SI</td>
+      <tr *ngFor="let item of prodi">
+        <!-- Iterasi melalui array `Prodi` untuk setiap elemen -->
+        <td>{{ item.nama }}</td>
+        <!-- Menampilkan properti `nama` dari setiap objek dalam array -->
+        <td>{{ item.singkatan }}</td>
+        <!-- Menampilkan properti `singkatan` dari setiap objek dalam array -->
       </tr>
     </tbody>
   </table>
