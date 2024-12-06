@@ -90,7 +90,13 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let item of fakultas">
+      <tr
+        *ngFor="
+          let item of fakultas
+            | paginate : { itemsPerPage: 5, currentPage: currentPage };
+          index as i
+        "
+      >
         <!-- Iterasi melalui array `fakultas` untuk setiap elemen -->
         <td>{{ item.nama }}</td>
         <!-- Menampilkan properti `nama` dari setiap objek dalam array -->
@@ -99,4 +105,9 @@
       </tr>
     </tbody>
   </table>
+  <!-- Kontrol Pagination -->
+  <!-- pagination-controls adalah komponen bawaan dari ngx-pagination -->
+  <!-- Ketika halaman berubah, properti currentPage diperbarui -->
+  <pagination-controls (pageChange)="currentPage = $event">
+  </pagination-controls>
 </div>
