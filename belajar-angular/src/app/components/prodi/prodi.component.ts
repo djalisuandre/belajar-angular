@@ -1,37 +1,127 @@
-import { CommonModule } from '@angular/common'; // Mengimpor CommonModule agar dapat menggunakan fitur-fitur dasar Angular seperti *ngIf dan *ngFor
-import { Component, OnInit, inject } from '@angular/core'; // Mengimpor dekorator Component, lifecycle hook OnInit, dan inject untuk injeksi HttpClient pada komponen standalone
-import { HttpClient } from '@angular/common/http'; // Mengimpor HttpClient untuk melakukan HTTP request
+import { CommonModule } from '@angular/common'; // Mengimpor modul Angular yang menyediakan direktif umum seperti ngIf, ngFor, dll.
+import { Component, OnInit, inject } from '@angular/core'; // Mengimpor decorator Component, interface OnInit untuk inisialisasi, dan inject untuk injeksi dependency.
+import { HttpClient } from '@angular/common/http'; // Mengimpor HttpClient untuk melakukan HTTP request ke server.
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms'; // Mengimpor modul dan class untuk membuat formulir reaktif.
+import * as bootstrap from 'bootstrap'; // Mengimpor Bootstrap untuk manipulasi modal dan elemen lainnya.
 
 @Component({
-  selector: 'app-prodi', // Nama selector untuk komponen ini. Komponen akan digunakan di template dengan tag <app-prodi></app-prodi>
-  standalone: true, // Menyatakan bahwa komponen ini adalah komponen standalone dan tidak membutuhkan module tambahan
-  imports: [CommonModule], // Mengimpor CommonModule untuk memungkinkan penggunaan direktif Angular standar seperti *ngIf dan *ngFor di template
-  templateUrl: './prodi.component.html', // Path ke file template HTML untuk komponen ini
-  styleUrl: './prodi.component.css', // Path ke file CSS untuk komponen ini
+  selector: 'app-prodi', // Selector untuk komponen ini digunakan dalam template HTML.
+  standalone: true, // Menjadikan komponen ini sebagai standalone, tanpa bagian dari modul Angular lainnya.
+  imports: [CommonModule, ReactiveFormsModule], // Mengimpor modul Angular yang dibutuhkan untuk komponen ini.
+  templateUrl: './prodi.component.html', // Lokasi file template HTML untuk komponen ini.
+  styleUrls: ['./prodi.component.css'], // Lokasi file CSS untuk komponen ini.
 })
 export class ProdiComponent implements OnInit {
-  // Deklarasi komponen dengan mengimplementasikan lifecycle hook OnInit
-  prodi: any[] = []; // Mendeklarasikan properti prodi yang akan menyimpan data yang diterima dari API
-  apiUrl = 'https://crud-express-seven.vercel.app/api/prodi'; // URL API yang digunakan untuk mendapatkan data prodi
-  isLoading = true; // Properti untuk status loading, digunakan untuk menunjukkan loader saat data sedang diambil
+  // Mendeklarasikan class komponen dengan implementasi OnInit untuk inisialisasi.
+  prodi: any[] = []; // Menyimpan data program studi.
+  fakultas: any[] = []; // Menyimpan data fakultas untuk dropdown.
+  apiProdiUrl = 'https://crud-express-seven.vercel.app/api/prodi'; // URL API untuk mengambil dan menambahkan data prodi.
+  apiFakultasUrl = 'https://crud-express-seven.vercel.app/api/fakultas'; // URL API untuk mengambil data fakultas.
+  isLoading = true; // Indikator loading data dari API.
+  prodiForm: FormGroup; // Form group untuk formulir reaktif prodi.
+  isSubmitting = false; // Indikator proses pengiriman data.
 
-  private http = inject(HttpClient); // Menggunakan inject untuk mendapatkan instance HttpClient di dalam komponen standalone (untuk Angular versi terbaru yang mendukung pendekatan ini)
+  private http = inject(HttpClient); // Menggunakan Angular inject API untuk menyuntikkan HttpClient.
+  private fb = inject(FormBuilder); // Menyuntikkan FormBuilder untuk membangun form reaktif.
+
+  constructor() {
+    // Konstruktor untuk inisialisasi komponen.
+    this.prodiForm = this.fb.group({
+      // Membuat grup form dengan FormBuilder.
+      nama: [''], // Field nama prodi.
+      singkatan: [''], // Field singkatan prodi.
+      fakultas_id: [null], // Field fakultas_id untuk relasi dengan fakultas.
+    });
+  }
 
   ngOnInit(): void {
-    // Lifecycle hook ngOnInit dipanggil saat komponen diinisialisasi
-    // Mengambil data dari API menggunakan HttpClient
-    this.http.get<any[]>(this.apiUrl).subscribe({
+    // Lifecycle method Angular, dipanggil saat komponen diinisialisasi.
+    this.getProdi(); // Memanggil fungsi untuk mengambil data prodi.
+    this.getFakultas(); // Memanggil fungsi untuk mengambil data fakultas.
+  }
+
+  // Mengambil data program studi
+  getProdi(): void {
+    this.http.get<any[]>(this.apiProdiUrl).subscribe({
+      // Melakukan HTTP GET ke API prodi.
       next: (data) => {
-        // Callback untuk menangani data yang diterima dari API
-        this.prodi = data; // Menyimpan data yang diterima ke dalam properti prodi
-        console.log('Data prodi:', this.prodi); // Mencetak data prodi di console untuk debugging
-        this.isLoading = false; // Mengubah status loading menjadi false, yang akan menghentikan tampilan loader
+        // Callback jika request berhasil.
+        this.prodi = data; // Menyimpan data prodi ke variabel.
+        this.isLoading = false; // Menonaktifkan indikator loading.
       },
       error: (err) => {
-        // Callback untuk menangani jika terjadi error saat mengambil data
-        console.error('Error fetching prodi data:', err); // Mencetak error di console untuk debugging
-        this.isLoading = false; // Tetap mengubah status loading menjadi false meskipun terjadi error, untuk menghentikan loader
+        // Callback jika request gagal.
+        console.error('Error fetching prodi data:', err); // Log error ke konsol.
+        this.isLoading = false; // Menonaktifkan indikator loading.
       },
     });
+  }
+
+  // Mengambil data fakultas untuk dropdown
+  getFakultas(): void {
+    this.http.get<any[]>(this.apiFakultasUrl).subscribe({
+      // Melakukan HTTP GET ke API fakultas.
+      next: (data) => {
+        // Callback jika request berhasil.
+        this.fakultas = data; // Menyimpan data fakultas ke variabel.
+      },
+      error: (err) => {
+        // Callback jika request gagal.
+        console.error('Error fetching fakultas data:', err); // Log error ke konsol.
+      },
+    });
+  }
+
+  // Method untuk menambahkan prodi
+  addProdi(): void {
+    if (this.prodiForm.valid) {
+      // Memastikan form valid sebelum mengirim data.
+      this.isSubmitting = true; // Mengaktifkan indikator pengiriman data.
+      this.http.post(this.apiProdiUrl, this.prodiForm.value).subscribe({
+        // Melakukan HTTP POST ke API prodi.
+        next: (response) => {
+          // Callback jika request berhasil.
+          console.log('Prodi berhasil ditambahkan:', response); // Log respons ke konsol.
+          this.getProdi(); // Refresh data prodi setelah penambahan.
+          this.prodiForm.reset(); // Reset form setelah data dikirim.
+          this.isSubmitting = false; // Menonaktifkan indikator pengiriman.
+
+          // Tutup modal setelah data berhasil ditambahkan
+          const modalElement = document.getElementById(
+            'tambahProdiModal'
+          ) as HTMLElement; // Ambil elemen modal berdasarkan ID.
+          if (modalElement) {
+            // Periksa jika elemen modal ada.
+            const modalInstance =
+              bootstrap.Modal.getInstance(modalElement) ||
+              new bootstrap.Modal(modalElement); // Ambil atau buat instance modal.
+            modalInstance.hide(); // Sembunyikan modal.
+
+            // Pastikan untuk menghapus atribut dan gaya pada body setelah modal ditutup
+            modalElement.addEventListener(
+              'hidden.bs.modal',
+              () => {
+                // Tambahkan event listener untuk modal yang ditutup.
+                const backdrop = document.querySelector('.modal-backdrop'); // Cari elemen backdrop modal.
+                if (backdrop) {
+                  backdrop.remove(); // Hapus backdrop jika ada.
+                }
+
+                // Pulihkan scroll pada body
+                document.body.classList.remove('modal-open'); // Hapus class 'modal-open' dari body.
+                document.body.style.overflow = ''; // Pulihkan properti overflow pada body.
+                document.body.style.paddingRight = ''; // Pulihkan padding body.
+              },
+              { once: true }
+            ); // Event listener hanya dijalankan sekali.
+          }
+        },
+        error: (err) => {
+          // Callback jika request gagal.
+          console.error('Error menambahkan prodi:', err); // Log error ke konsol.
+          this.isSubmitting = false; // Menonaktifkan indikator pengiriman.
+        },
+      });
+    }
   }
 }
