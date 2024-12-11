@@ -77,12 +77,7 @@ export class ProdiComponent implements OnInit {
     if (this.prodiForm.valid) {
       // Memastikan form valid sebelum mengirim data.
       this.isSubmitting = true; // Mengaktifkan indikator pengiriman data.
-      const formData = {
-        ...this.prodiForm.value,
-        mahasiswa: [],
-        prodi_id: null,
-        foto: null,
-      }; // Tambahkan field 'mahasiswa' dengan nilai array kosong dan 'prodi_id' dengan nilai null.
+      const formData = this.prodiForm.value; // Menggunakan nilai form tanpa tambahan field.
       this.http.post(this.apiProdiUrl, formData).subscribe({
         // Melakukan HTTP POST ke API prodi.
         next: (response) => {

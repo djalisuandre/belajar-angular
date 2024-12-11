@@ -81,6 +81,14 @@
                 formControlName="asal_sekolah"
               />
             </div>
+            <div class="mb-3">
+              <label for="prodi" class="form-label">Program Studi</label>
+              <select id="prodi" class="form-select" formControlName="prodi_id">
+                <option *ngFor="let prodi of prodi" [value]="prodi._id">
+                  {{ prodi.nama }}
+                </option>
+              </select>
+            </div>
             <button
               type="submit"
               class="btn btn-primary"

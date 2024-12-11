@@ -14,7 +14,9 @@ import * as bootstrap from 'bootstrap'; // Mengimpor Bootstrap untuk manipulasi 
 export class MahasiswaComponent implements OnInit {
   // Deklarasi komponen dengan mengimplementasikan lifecycle hook OnInit
   mahasiswa: any[] = []; // Mendeklarasikan properti mahasiswa yang akan menyimpan data yang diterima dari API
+  prodi: any[] = []; // Mendeklarasikan properti prodi yang akan menyimpan data prodi yang diterima dari API
   apiUrl = 'https://crud-express-seven.vercel.app/api/mahasiswa'; // URL API yang digunakan untuk mendapatkan data mahasiswa
+  apiProdiUrl = 'https://crud-express-seven.vercel.app/api/prodi'; // URL API untuk mengambil dan menambahkan data prodi.
   isLoading = true; // Properti untuk status loading, digunakan untuk menunjukkan loader saat data sedang diambil
   mahasiswaForm: FormGroup; // Form group untuk formulir reaktif mahasiswa.
   isSubmitting = false; // Indikator proses pengiriman data.
@@ -29,25 +31,13 @@ export class MahasiswaComponent implements OnInit {
       npm: [''],
       jenis_kelamin: [''], // Field jenis kelamin mahasiswa.
       asal_sekolah: [''], //Field asal sekolah mahasiswa
+      prodi_id: [null], // Field prodi_id untuk relasi dengan prodi.
     });
   }
 
   ngOnInit(): void {
-    // Lifecycle hook ngOnInit dipanggil saat komponen diinisialisasi
-    // Mengambil data dari API menggunakan HttpClient
-    this.http.get<any[]>(this.apiUrl).subscribe({
-      next: (data) => {
-        // Callback untuk menangani data yang diterima dari API
-        this.mahasiswa = data; // Menyimpan data yang diterima ke dalam properti mahasiswa
-        console.log('Data mahasiswa:', this.mahasiswa); // Mencetak data mahasiswa di console untuk debugging
-        this.isLoading = false; // Mengubah status loading menjadi false, yang akan menghentikan tampilan loader
-      },
-      error: (err) => {
-        // Callback untuk menangani jika terjadi error saat mengambil data
-        console.error('Error fetching mahasiswa data:', err); // Mencetak error di console untuk debugging
-        this.isLoading = false; // Tetap mengubah status loading menjadi false meskipun terjadi error, untuk menghentikan loader
-      },
-    });
+    this.getMahasiswa(); // Memanggil fungsi untuk mengambil data mahasiswa.
+    this.getProdi(); // Memanggil fungsi untuk mengambil data prodi.
   }
 
   getMahasiswa(): void {
@@ -66,6 +56,22 @@ export class MahasiswaComponent implements OnInit {
     });
   }
 
+  getProdi(): void {
+    this.http.get<any[]>(this.apiProdiUrl).subscribe({
+      // Melakukan HTTP GET ke API prodi.
+      next: (data) => {
+        // Callback jika request berhasil.
+        this.prodi = data; // Menyimpan data prodi ke variabel.
+        this.isLoading = false; // Menonaktifkan indikator loading.
+      },
+      error: (err) => {
+        // Callback jika request gagal.
+        console.error('Error fetching prodi data:', err); // Log error ke konsol.
+        this.isLoading = false; // Menonaktifkan indikator loading.
+      },
+    });
+  }
+
   // Method untuk menambahkan mahasiswa
   addMahasiswa(): void {
     if (this.mahasiswaForm.valid) {
@@ -78,7 +84,7 @@ export class MahasiswaComponent implements OnInit {
           console.log('Mahasiswa berhasil ditambahkan:', response);
           this.getMahasiswa();
           this.mahasiswaForm.reset();
-          this.isSubmitting = false;
+          this.isSubmitting = true;
 
           // Tutup modal setelah data berhasil ditambahkan
           const modalElement = document.getElementById(
@@ -132,6 +138,7 @@ export class MahasiswaComponent implements OnInit {
           npm: data.npm,
           jenis_kelamin: data.jenis_kelamin,
           asal_sekolah: data.asal_sekolah,
+          prodi_id: data.prodi_id,
         });
 
         // Buka modal edit
