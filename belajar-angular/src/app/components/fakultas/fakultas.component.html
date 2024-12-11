@@ -77,6 +77,58 @@
     </div>
   </div>
 
+  <!-- Modal edit Fakultas -->
+  <div
+    class="modal fade"
+    id="editFakultasModal"
+    tabindex="-1"
+    aria-labelledby="editFakultasModalLabel"
+    aria-hidden="true"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editFakultasModalLabel">Ubah Fakultas</h5>
+          <button
+            type="button"
+            class="btn-close"
+            data-bs-dismiss="modal"
+            aria-label="Close"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <form [formGroup]="fakultasForm" (ngSubmit)="updateFakultas()">
+            <div class="mb-3">
+              <label for="editNama" class="form-label">Nama Fakultas</label>
+              <input
+                id="editNama"
+                type="text"
+                class="form-control"
+                formControlName="nama"
+              />
+            </div>
+            <div class="mb-3">
+              <label for="editSingkatan" class="form-label">Singkatan</label>
+              <input
+                id="editSingkatan"
+                type="text"
+                class="form-control"
+                formControlName="singkatan"
+              />
+            </div>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="isSubmitting"
+            >
+              {{ isSubmitting ? "Menyimpan..." : "Ubah Fakultas" }}
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Data Fakultas -->
   <table class="table table-bordered table-striped" *ngIf="!isLoading">
     <!-- Tabel ditampilkan hanya jika `isLoading` bernilai false -->
@@ -86,22 +138,39 @@
         <th>Nama</th>
         <!-- Kolom untuk menampilkan nama fakultas -->
         <th>Singkatan</th>
-        <!-- Kolom untuk menampilkan nama dekan -->
+        <!-- Kolom untuk Action -->
+        <th>Aksi</th>
       </tr>
     </thead>
     <tbody>
       <tr
         *ngFor="
           let item of fakultas
-            | paginate : { itemsPerPage: 5, currentPage: currentPage };
+            | paginate : { itemsPerPage: 10, currentPage: currentPage };
           index as i
         "
       >
         <!-- Iterasi melalui array `fakultas` untuk setiap elemen -->
         <td>{{ item.nama }}</td>
-        <!-- Menampilkan properti `nama` dari setiap objek dalam array -->
-        <td>{{ item.singkatan }}</td>
         <!-- Menampilkan properti `singkatan` dari setiap objek dalam array -->
+        <td>{{ item.singkatan }}</td>
+        <!-- Menampilkan aksi -->
+        <td>
+          <button
+            type="button"
+            class="btn btn-warning me-2"
+            (click)="getFakultasById(item._id)"
+          >
+            Edit
+          </button>
+          <button
+            type="button"
+            class="btn btn-danger"
+            (click)="deleteFakultas(item._id)"
+          >
+            Hapus
+          </button>
+        </td>
       </tr>
     </tbody>
   </table>

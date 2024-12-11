@@ -77,7 +77,13 @@ export class ProdiComponent implements OnInit {
     if (this.prodiForm.valid) {
       // Memastikan form valid sebelum mengirim data.
       this.isSubmitting = true; // Mengaktifkan indikator pengiriman data.
-      this.http.post(this.apiProdiUrl, this.prodiForm.value).subscribe({
+      const formData = {
+        ...this.prodiForm.value,
+        mahasiswa: [],
+        prodi_id: null,
+        foto: null,
+      }; // Tambahkan field 'mahasiswa' dengan nilai array kosong dan 'prodi_id' dengan nilai null.
+      this.http.post(this.apiProdiUrl, formData).subscribe({
         // Melakukan HTTP POST ke API prodi.
         next: (response) => {
           // Callback jika request berhasil.
@@ -122,6 +128,83 @@ export class ProdiComponent implements OnInit {
           this.isSubmitting = false; // Menonaktifkan indikator pengiriman.
         },
       });
+    }
+  }
+
+  // Method untuk menghapus prodi
+  deleteProdi(_id: string): void {
+    if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+      // Konfirmasi penghapusan
+      this.http.delete(`${this.apiProdiUrl}/${_id}`).subscribe({
+        next: () => {
+          console.log(`Prodi dengan ID ${_id} berhasil dihapus`);
+          this.getProdi(); // Refresh data prodi setelah penghapusan
+        },
+        error: (err) => {
+          console.error('Error menghapus prodi:', err); // Log error jika penghapusan gagal
+        },
+      });
+    }
+  }
+
+  // Method untuk menampilkan modal edit prodi
+  editProdiId: string | null = null; // ID prodi yang sedang diubah
+
+  // Method untuk mendapatkan data prodi berdasarkan ID
+  getProdiById(_id: string): void {
+    this.editProdiId = _id; // Menyimpan ID prodi yang dipilih
+    this.http.get(`${this.apiProdiUrl}/${_id}`).subscribe({
+      next: (data: any) => {
+        // Isi form dengan data yang diterima dari API
+        this.prodiForm.patchValue({
+          nama: data.nama,
+          singkatan: data.singkatan,
+          fakultas_id: data.fakultas_id,
+        });
+
+        // Buka modal edit
+        const modalElement = document.getElementById(
+          'editProdiModal'
+        ) as HTMLElement;
+        if (modalElement) {
+          const modalInstance =
+            bootstrap.Modal.getInstance(modalElement) ||
+            new bootstrap.Modal(modalElement);
+          modalInstance.show();
+        }
+      },
+      error: (err) => {
+        console.error('Error fetching prodi data by ID:', err);
+      },
+    });
+  }
+
+  // Method untuk mengupdate data prodi
+  updateProdi(): void {
+    if (this.prodiForm.valid) {
+      this.isSubmitting = true;
+      this.http
+        .put(`${this.apiProdiUrl}/${this.editProdiId}`, this.prodiForm.value)
+        .subscribe({
+          next: (response) => {
+            console.log('Prodi berhasil diperbarui:', response);
+            this.getProdi(); // Refresh data prodi
+            this.isSubmitting = false;
+
+            // Tutup modal edit setelah data berhasil diupdate
+            const modalElement = document.getElementById(
+              'editProdiModal'
+            ) as HTMLElement;
+            if (modalElement) {
+              const modalInstance = bootstrap.Modal.getInstance(modalElement);
+              modalInstance?.hide();
+            }
+          },
+          error: (err) => {
+            console.error('Error updating prodi:', err);
+            this.isSubmitting = false;
+          },
+        });
     }
   }
 }
