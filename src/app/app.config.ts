@@ -22,6 +22,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
 
     // Menyediakan layanan HttpClient untuk memungkinkan permintaan HTTP (GET, POST, dll.)
-    provideHttpClient(),
-  ],
+    provideHttpClient()
+  ]
 };

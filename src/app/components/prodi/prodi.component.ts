@@ -77,60 +77,64 @@ export class ProdiComponent implements OnInit {
     if (this.prodiForm.valid) {
       // Memastikan form valid sebelum mengirim data.
       this.isSubmitting = true; // Mengaktifkan indikator pengiriman data.
-      const formData = this.prodiForm.value; // Menggunakan nilai form tanpa tambahan field.
-      this.http.post(this.apiProdiUrl, formData).subscribe({
-        // Melakukan HTTP POST ke API prodi.
-        next: (response) => {
-          // Callback jika request berhasil.
-          console.log('Prodi berhasil ditambahkan:', response); // Log respons ke konsol.
-          this.getProdi(); // Refresh data prodi setelah penambahan.
-          this.prodiForm.reset(); // Reset form setelah data dikirim.
-          this.isSubmitting = false; // Menonaktifkan indikator pengiriman.
+      const token = localStorage.getItem('authToken'); // Ambil token dari local storage
+      const headers = { Authorization: `Bearer ${token}` };
+      this.http
+        .post(this.apiProdiUrl, this.prodiForm.value, { headers })
+        .subscribe({
+          // Melakukan HTTP POST ke API prodi.
+          next: (response) => {
+            // Callback jika request berhasil.
+            console.log('Prodi berhasil ditambahkan:', response); // Log respons ke konsol.
+            this.getProdi(); // Refresh data prodi setelah penambahan.
+            this.prodiForm.reset(); // Reset form setelah data dikirim.
+            this.isSubmitting = false; // Menonaktifkan indikator pengiriman.
 
-          // Tutup modal setelah data berhasil ditambahkan
-          const modalElement = document.getElementById(
-            'tambahProdiModal'
-          ) as HTMLElement; // Ambil elemen modal berdasarkan ID.
-          if (modalElement) {
-            // Periksa jika elemen modal ada.
-            const modalInstance =
-              bootstrap.Modal.getInstance(modalElement) ||
-              new bootstrap.Modal(modalElement); // Ambil atau buat instance modal.
-            modalInstance.hide(); // Sembunyikan modal.
+            // Tutup modal setelah data berhasil ditambahkan
+            const modalElement = document.getElementById(
+              'tambahProdiModal'
+            ) as HTMLElement; // Ambil elemen modal berdasarkan ID.
+            if (modalElement) {
+              // Periksa jika elemen modal ada.
+              const modalInstance =
+                bootstrap.Modal.getInstance(modalElement) ||
+                new bootstrap.Modal(modalElement); // Ambil atau buat instance modal.
+              modalInstance.hide(); // Sembunyikan modal.
 
-            // Pastikan untuk menghapus atribut dan gaya pada body setelah modal ditutup
-            modalElement.addEventListener(
-              'hidden.bs.modal',
-              () => {
-                // Tambahkan event listener untuk modal yang ditutup.
-                const backdrop = document.querySelector('.modal-backdrop'); // Cari elemen backdrop modal.
-                if (backdrop) {
-                  backdrop.remove(); // Hapus backdrop jika ada.
-                }
+              // Pastikan untuk menghapus atribut dan gaya pada body setelah modal ditutup
+              modalElement.addEventListener(
+                'hidden.bs.modal',
+                () => {
+                  // Tambahkan event listener untuk modal yang ditutup.
+                  const backdrop = document.querySelector('.modal-backdrop'); // Cari elemen backdrop modal.
+                  if (backdrop) {
+                    backdrop.remove(); // Hapus backdrop jika ada.
+                  }
 
-                // Pulihkan scroll pada body
-                document.body.classList.remove('modal-open'); // Hapus class 'modal-open' dari body.
-                document.body.style.overflow = ''; // Pulihkan properti overflow pada body.
-                document.body.style.paddingRight = ''; // Pulihkan padding body.
-              },
-              { once: true }
-            ); // Event listener hanya dijalankan sekali.
-          }
-        },
-        error: (err) => {
-          // Callback jika request gagal.
-          console.error('Error menambahkan prodi:', err); // Log error ke konsol.
-          this.isSubmitting = false; // Menonaktifkan indikator pengiriman.
-        },
-      });
+                  // Pulihkan scroll pada body
+                  document.body.classList.remove('modal-open'); // Hapus class 'modal-open' dari body.
+                  document.body.style.overflow = ''; // Pulihkan properti overflow pada body.
+                  document.body.style.paddingRight = ''; // Pulihkan padding body.
+                },
+                { once: true }
+              ); // Event listener hanya dijalankan sekali.
+            }
+          },
+          error: (err) => {
+            // Callback jika request gagal.
+            console.error('Error menambahkan prodi:', err); // Log error ke konsol.
+            this.isSubmitting = false; // Menonaktifkan indikator pengiriman.
+          },
+        });
     }
   }
-
   // Method untuk menghapus prodi
   deleteProdi(_id: string): void {
     if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+      const token = localStorage.getItem('authToken'); // Ambil token dari local storage
+      const headers = { Authorization: `Bearer ${token}` }; // Set header Authorization dengan token
       // Konfirmasi penghapusan
-      this.http.delete(`${this.apiProdiUrl}/${_id}`).subscribe({
+      this.http.delete(`${this.apiProdiUrl}/${_id}`, { headers }).subscribe({
         next: () => {
           console.log(`Prodi dengan ID ${_id} berhasil dihapus`);
           this.getProdi(); // Refresh data prodi setelah penghapusan
@@ -141,8 +145,6 @@ export class ProdiComponent implements OnInit {
       });
     }
   }
-
-  // Method untuk menampilkan modal edit prodi
   editProdiId: string | null = null; // ID prodi yang sedang diubah
 
   // Method untuk mendapatkan data prodi berdasarkan ID
@@ -178,8 +180,12 @@ export class ProdiComponent implements OnInit {
   updateProdi(): void {
     if (this.prodiForm.valid) {
       this.isSubmitting = true;
+      const token = localStorage.getItem('authToken'); // Ambil token dari local storage
+      const headers = { Authorization: `Bearer ${token}` };
       this.http
-        .put(`${this.apiProdiUrl}/${this.editProdiId}`, this.prodiForm.value)
+        .put(`${this.apiProdiUrl}/${this.editProdiId}`, this.prodiForm.value, {
+          headers,
+        })
         .subscribe({
           next: (response) => {
             console.log('Prodi berhasil diperbarui:', response);

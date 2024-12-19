@@ -161,9 +161,11 @@ export class FakultasComponent implements OnInit {
 
   // Method untuk menghapus fakultas
   deleteFakultas(id: string): void {
+    const token = localStorage.getItem('authToken'); // Ambil token dari local storage
+    const headers = { Authorization: `Bearer ${token}` };
     if (confirm('Apakah Anda yakin ingin menghapus data ini?')) {
       // Konfirmasi Penghapusan
-      this.http.delete(`${this.apiUrl}/${id}`).subscribe({
+      this.http.delete(`${this.apiUrl}/${id}`, { headers }).subscribe({
         next: (response) => {
           console.log('Data berhasil dihapus:', response);
           this.getFakultas(); // Refresh data fakultas
